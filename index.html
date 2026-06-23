@@ -715,6 +715,53 @@ function exportText() {
   navigator.clipboard.writeText(out).then(()=>showToast('✓ Бриф скопирован в буфер обмена'));
 }
 
+async function sendBrief() {
+  if(!formData['_consent']) { showToast('⚠️ Подтвердите согласие на обработку ПД'); return; }
+
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Отправка...';
+
+  // Собираем текст брифа
+  let text = '═══ БРИФ · NEUROMILANKA ═══\n\n';
+  text += `Согласие на обработку ПД: ✓ Подтверждено\nДата: ${new Date().toLocaleString('ru')}\n\n`;
+  SECTIONS.forEach(s => {
+    if(s.id==='summary') return;
+    const hasData=s.fields.some(f=>{const v=formData[f.id];return v&&(Array.isArray(v)?v.length>0:String(v).trim().length>0);});
+    if(!hasData) return;
+    text+=`▌ ${s.fullTitle.toUpperCase()}\n`;
+    s.fields.forEach(f=>{const val=formData[f.id];if(val) text+=`  ${f.label||s.fullTitle}: ${formatVal(val)}\n`;});
+    text+='\n';
+  });
+
+  try {
+    const res = await fetch('https://formspree.io/f/meeboowq', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json', 'Accept':'application/json'},
+      body: JSON.stringify({
+        _subject: `Новый бриф от ${formData['company']||formData['email']||'заказчика'}`,
+        email: formData['email'] || 'не указан',
+        company: formData['company'] || 'не указано',
+        contact: formData['contact'] || 'не указан',
+        consent: '✓ Подтверждено',
+        brief: text
+      })
+    });
+    if(res.ok) {
+      btn.textContent = '✓ Отправлено!';
+      btn.style.background = 'var(--success)';
+      btn.style.color = '#000';
+      showToast('✓ Бриф отправлен на почту исполнителя!');
+    } else {
+      throw new Error('error');
+    }
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '📨 Отправить исполнителю';
+    showToast('⚠️ Ошибка отправки — скопируйте бриф вручную');
+  }
+}
+
 function exportJSON() {
   const blob=new Blob([JSON.stringify(formData,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob); const a=document.createElement('a');
@@ -738,7 +785,14 @@ function renderSummaryHTML() {
     s.fields.forEach(f=>{const val=formData[f.id];if(!val||(Array.isArray(val)&&val.length===0)) return;html+=`<div class="summary-row"><div class="summary-key">${f.label||f.id}</div><div class="summary-val">${formatVal(val)}</div></div>`;});
     html+=`</div>`;
   });
-  html+=`<div class="btn-row"><button class="btn btn-secondary" onclick="goTo(${SECTIONS.length-2})">← Назад</button><div style="display:flex;gap:10px"><button class="btn btn-secondary" onclick="exportJSON()">📥 JSON</button><button class="btn btn-primary" onclick="exportText()">📋 Копировать бриф</button></div></div>`;
+  html+=`<div class="btn-row" style="flex-direction:column;gap:10px">
+    <button id="sendBtn" class="btn btn-primary" style="width:100%;font-size:15px;padding:15px" onclick="sendBrief()">📨 Отправить бриф исполнителю</button>
+    <div style="display:flex;gap:10px;width:100%">
+      <button class="btn btn-secondary" style="flex:1" onclick="goTo(${SECTIONS.length-2})">← Назад</button>
+      <button class="btn btn-secondary" style="flex:1" onclick="exportJSON()">📥 JSON</button>
+      <button class="btn btn-secondary" style="flex:1" onclick="exportText()">📋 Копировать</button>
+    </div>
+  </div>`;
   return html;
 }
 
