@@ -1,0 +1,335 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Главбух автодилера: тренажёр</title>
+<script src="quiz-data.js"></script>
+<style>
+:root{
+  --bg:#f7f6f3; --surface:#ffffff; --surface-2:#f1efe9; --border:#e3dfd4;
+  --fg:#1d1b16; --fg-dim:#6b6558; --accent:#b5491f; --accent-fg:#ffffff;
+  --good:#2f7d4f; --bad:#b5312a; --radius:14px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15130f; --surface:#211e18; --surface-2:#2a261e; --border:#3a3527;
+    --fg:#f1ede3; --fg-dim:#b3ab98; --accent:#e18657; --accent-fg:#1d1407;
+    --good:#5fcb86; --bad:#ef6a62;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15130f; --surface:#211e18; --surface-2:#2a261e; --border:#3a3527;
+  --fg:#f1ede3; --fg-dim:#b3ab98; --accent:#e18657; --accent-fg:#1d1407;
+  --good:#5fcb86; --bad:#ef6a62;
+  color-scheme: dark;
+}
+*{box-sizing:border-box;}
+body{
+  background:var(--bg); color:var(--fg);
+  font-family:"Source Sans 3",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  padding-left:max(16px, env(safe-area-inset-left,0px));
+  padding-right:max(16px, env(safe-area-inset-right,0px));
+  padding-block:20px 48px;
+  min-height:100vh;
+}
+.wrap{max-width:720px;margin:0 auto;}
+h1{font-family:"Fraunces",Georgia,serif;font-size:1.5rem;font-weight:600;margin:0 0 4px;letter-spacing:-.01em;text-wrap:balance;}
+.subtitle{color:var(--fg-dim);font-size:.92rem;margin:0 0 18px;line-height:1.4;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;}
+.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+.tab{border:1px solid var(--border);background:var(--surface);color:var(--fg);border-radius:999px;padding:7px 16px;font-size:.85rem;cursor:pointer;font-weight:600;}
+.tab.active{background:var(--accent);color:var(--accent-fg);border-color:var(--accent);}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.chip{border:1px solid var(--border);background:var(--surface-2);color:var(--fg);border-radius:999px;padding:5px 12px;font-size:.78rem;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;}
+.chip .dot{width:7px;height:7px;border-radius:50%;flex:none;}
+.chip.active{background:var(--fg);color:var(--bg);border-color:var(--fg);}
+.chip.active .dot{filter:none;}
+.statrow{display:flex;gap:14px;flex-wrap:wrap;color:var(--fg-dim);font-size:.82rem;margin-bottom:10px;}
+.statrow b{color:var(--fg);}
+button.primary{background:var(--accent);color:var(--accent-fg);border:none;border-radius:10px;padding:11px 18px;font-size:.95rem;font-weight:700;cursor:pointer;}
+button.ghost{background:transparent;color:var(--fg);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-size:.9rem;cursor:pointer;font-weight:600;}
+button:disabled{opacity:.45;cursor:default;}
+.qnum{color:var(--fg-dim);font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;font-weight:700;margin-bottom:8px;}
+.qtext{font-size:1.08rem;line-height:1.45;margin:0 0 16px;font-weight:600;text-wrap:balance;}
+.opt{display:block;width:100%;text-align:left;background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:12px 14px;margin-bottom:9px;font-size:.95rem;cursor:pointer;color:var(--fg);line-height:1.35;min-width:0;}
+.opt:hover{border-color:var(--accent);}
+.opt.correct{background:color-mix(in srgb, var(--good) 18%, var(--surface));border-color:var(--good);}
+.opt.wrong{background:color-mix(in srgb, var(--bad) 16%, var(--surface));border-color:var(--bad);}
+.opt.disabledopt{cursor:default;}
+.explain{margin-top:12px;padding:12px 14px;background:var(--surface-2);border-radius:11px;font-size:.88rem;line-height:1.5;color:var(--fg-dim);display:none;}
+.explain.show{display:block;}
+.explain b{color:var(--fg);}
+.navrow{display:flex;justify-content:space-between;gap:10px;margin-top:16px;}
+.progressbar{height:6px;background:var(--surface-2);border-radius:999px;overflow:hidden;margin-bottom:16px;}
+.progressbar>div{height:100%;background:var(--accent);transition:width .2s;}
+.result{text-align:center;padding:30px 12px;}
+.result .score{font-family:"Fraunces",Georgia,serif;font-size:3rem;font-weight:600;margin:4px 0;}
+.resultbtns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:18px;}
+.flash{min-height:180px;display:flex;flex-direction:column;justify-content:center;cursor:pointer;}
+.flash .face{text-align:center;}
+.flash .hint{color:var(--fg-dim);font-size:.75rem;margin-top:14px;text-align:center;}
+.catbadge{display:inline-block;font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:999px;margin-bottom:10px;color:#fff;}
+.toprow{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;}
+.icon-btn{background:none;border:none;color:var(--fg-dim);font-size:.8rem;cursor:pointer;text-decoration:underline;padding:0;}
+@media (max-width:480px){ .qtext{font-size:1rem;} .result .score{font-size:2.4rem;} }
+</style>
+
+<div class="wrap">
+  <h1 id="title"></h1>
+  <p class="subtitle" id="subtitle"></p>
+
+  <div class="tabs">
+    <button class="tab active" id="tabQuiz">Квиз</button>
+    <button class="tab" id="tabFlash">Карточки</button>
+    <button class="tab" id="tabStats">Статистика</button>
+  </div>
+
+  <div id="setup" class="card">
+    <div style="font-weight:700;margin-bottom:10px;">Темы (можно выбрать несколько)</div>
+    <div class="chips" id="chipRow"></div>
+    <div class="statrow">
+      <span>Выбрано вопросов: <b id="poolCount">0</b></span>
+    </div>
+    <button class="primary" id="startBtn">Начать</button>
+    <button class="ghost" id="wrongOnlyBtn" style="margin-left:8px;">Повторить ошибки (<span id="wrongCount">0</span>)</button>
+  </div>
+
+  <div id="playArea" style="display:none;"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var ALL = QUIZ_DATA.questions.map(function(q,i){ return Object.assign({_id:i}, q); });
+  var CATS = QUIZ_DATA.categories;
+  var catById = {}; CATS.forEach(function(c){ catById[c.id]=c; });
+
+  document.getElementById('title').textContent = QUIZ_DATA.meta.title;
+  document.getElementById('subtitle').textContent = QUIZ_DATA.meta.subtitle;
+
+  // ---- persistence (per-browser only, best effort) ----
+  var STORE_KEY = 'avtodiler_quiz_progress_v1';
+  function loadProgress(){
+    try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {wrong:{}, seen:{}, mode:'quiz', selectedCats:null}; }
+    catch(e){ return {wrong:{}, seen:{}, mode:'quiz', selectedCats:null}; }
+  }
+  function saveProgress(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(progress)); }catch(e){} }
+  var progress = loadProgress();
+
+  var selectedCats = progress.selectedCats && progress.selectedCats.length ? progress.selectedCats.slice() : CATS.map(function(c){return c.id;});
+
+  var mode = 'quiz'; // quiz | flash | stats
+  var session = null; // {items, idx, score, answered:[], onlyWrong}
+
+  // ---- UI: tabs ----
+  var tabQuiz=document.getElementById('tabQuiz'), tabFlash=document.getElementById('tabFlash'), tabStats=document.getElementById('tabStats');
+  tabQuiz.onclick=function(){ setMode('quiz'); };
+  tabFlash.onclick=function(){ setMode('flash'); };
+  tabStats.onclick=function(){ setMode('stats'); };
+
+  function setMode(m){
+    mode = m;
+    tabQuiz.classList.toggle('active', m==='quiz');
+    tabFlash.classList.toggle('active', m==='flash');
+    tabStats.classList.toggle('active', m==='stats');
+    document.getElementById('setup').style.display = (m==='stats') ? 'none' : 'block';
+    if(m==='stats'){ renderStats(); }
+    else { document.getElementById('playArea').style.display='none'; document.getElementById('playArea').innerHTML=''; renderSetup(); }
+  }
+
+  // ---- chips ----
+  var chipRow = document.getElementById('chipRow');
+  function renderChips(){
+    chipRow.innerHTML='';
+    CATS.forEach(function(c){
+      var n = ALL.filter(function(q){return q.cat===c.id;}).length;
+      var el = document.createElement('div');
+      el.className = 'chip' + (selectedCats.indexOf(c.id)>=0 ? ' active':'');
+      el.innerHTML = '<span class="dot" style="background:'+c.color+'"></span>'+c.name+' ('+n+')';
+      el.onclick = function(){
+        var idx = selectedCats.indexOf(c.id);
+        if(idx>=0){ if(selectedCats.length>1) selectedCats.splice(idx,1); }
+        else { selectedCats.push(c.id); }
+        progress.selectedCats = selectedCats; saveProgress();
+        renderChips(); updatePoolCount();
+      };
+      chipRow.appendChild(el);
+    });
+  }
+  function currentPool(){ return ALL.filter(function(q){ return selectedCats.indexOf(q.cat)>=0; }); }
+  function updatePoolCount(){
+    document.getElementById('poolCount').textContent = currentPool().length;
+    var wrongIds = Object.keys(progress.wrong).filter(function(k){return progress.wrong[k];});
+    document.getElementById('wrongCount').textContent = wrongIds.length;
+    document.getElementById('wrongOnlyBtn').disabled = wrongIds.length===0;
+  }
+
+  document.getElementById('startBtn').onclick=function(){ startSession(false); };
+  document.getElementById('wrongOnlyBtn').onclick=function(){ startSession(true); };
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+    return a;
+  }
+
+  function orderUnseenFirst(pool){
+    var unseen = pool.filter(function(q){ return !progress.seen[q._id]; });
+    var seenQ = pool.filter(function(q){ return progress.seen[q._id]; });
+    return shuffle(unseen).concat(shuffle(seenQ));
+  }
+
+  function startSession(onlyWrong){
+    var pool;
+    if(onlyWrong){
+      var wrongIds = Object.keys(progress.wrong).filter(function(k){return progress.wrong[k];}).map(Number);
+      pool = ALL.filter(function(q){return wrongIds.indexOf(q._id)>=0;});
+    } else {
+      pool = currentPool();
+    }
+    if(pool.length===0) return;
+    session = { items: orderUnseenFirst(pool), idx:0, score:0, onlyWrong: !!onlyWrong, revealed:false };
+    document.getElementById('setup').style.display='none';
+    document.getElementById('playArea').style.display='block';
+    if(mode==='flash') renderFlashCurrent(); else renderQuizCurrent();
+  }
+
+  function renderSetup(){
+    renderChips(); updatePoolCount();
+    document.getElementById('setup').style.display='block';
+    document.getElementById('playArea').style.display='none';
+    document.getElementById('playArea').innerHTML='';
+  }
+
+  // ---- QUIZ MODE ----
+  function renderQuizCurrent(){
+    var area = document.getElementById('playArea');
+    var item = session.items[session.idx];
+    var pct = Math.round((session.idx)/session.items.length*100);
+    var cat = catById[item.cat];
+    var optsOrder = item._optsOrder || (item._optsOrder = shuffle(item.o.map(function(_,i){return i;})));
+    var html = '';
+    html += '<div class="progressbar"><div style="width:'+pct+'%"></div></div>';
+    html += '<div class="card">';
+    html += '<div class="toprow"><span class="catbadge" style="background:'+cat.color+'">'+cat.name+'</span>'+
+            '<span style="color:var(--fg-dim);font-size:.8rem;">'+(session.idx+1)+' / '+session.items.length+' · счёт '+session.score+'</span></div>';
+    html += '<div class="qtext">'+item.q+'</div>';
+    html += '<div id="optsBox">';
+    optsOrder.forEach(function(origIdx, pos){
+      html += '<button class="opt" data-idx="'+origIdx+'">'+item.o[origIdx]+'</button>';
+    });
+    html += '</div>';
+    html += '<div class="explain" id="explainBox"><b>Пояснение.</b> '+item.e+'</div>';
+    html += '<div class="navrow"><button class="ghost" id="skipBtn">Пропустить</button><button class="primary" id="nextBtn" disabled>Дальше</button></div>';
+    html += '</div>';
+    area.innerHTML = html;
+    session.revealed=false;
+
+    Array.prototype.forEach.call(area.querySelectorAll('.opt'), function(btn){
+      btn.onclick = function(){
+        if(session.revealed) return;
+        session.revealed = true;
+        var chosen = parseInt(btn.getAttribute('data-idx'),10);
+        var correct = chosen === item.a;
+        Array.prototype.forEach.call(area.querySelectorAll('.opt'), function(b){
+          b.classList.add('disabledopt');
+          var bi = parseInt(b.getAttribute('data-idx'),10);
+          if(bi===item.a) b.classList.add('correct');
+          else if(bi===chosen) b.classList.add('wrong');
+        });
+        document.getElementById('explainBox').classList.add('show');
+        document.getElementById('nextBtn').disabled=false;
+        if(correct){ session.score++; progress.wrong[item._id]=false; }
+        else { progress.wrong[item._id]=true; }
+        progress.seen[item._id]=true;
+        saveProgress();
+      };
+    });
+    document.getElementById('skipBtn').onclick=function(){ advance(); };
+    document.getElementById('nextBtn').onclick=function(){ advance(); };
+  }
+  function advance(){
+    session.idx++;
+    if(session.idx>=session.items.length){ renderQuizResult(); }
+    else renderQuizCurrent();
+  }
+  function renderQuizResult(){
+    var area=document.getElementById('playArea');
+    var total=session.items.length;
+    var pct = total ? Math.round(session.score/total*100) : 0;
+    var verdict = pct>=85 ? 'Готова к собеседованию.' : pct>=60 ? 'Хорошая база, добей слабые темы.' : 'Есть над чем поработать — пройди ещё раз.';
+    area.innerHTML = '<div class="card result">'+
+      '<div style="color:var(--fg-dim);font-size:.85rem;text-transform:uppercase;letter-spacing:.05em;font-weight:700;">Результат</div>'+
+      '<div class="score">'+session.score+' / '+total+'</div>'+
+      '<div style="color:var(--fg-dim);">'+pct+'% правильных · '+verdict+'</div>'+
+      '<div class="resultbtns">'+
+        '<button class="primary" id="againBtn">Пройти снова</button>'+
+        '<button class="ghost" id="backBtn">К выбору тем</button>'+
+      '</div></div>';
+    document.getElementById('againBtn').onclick=function(){ startSession(session.onlyWrong); };
+    document.getElementById('backBtn').onclick=function(){ renderSetup(); };
+  }
+
+  // ---- FLASHCARD MODE ----
+  function renderFlashCurrent(){
+    var area=document.getElementById('playArea');
+    var item = session.items[session.idx];
+    var cat = catById[item.cat];
+    var pct = Math.round((session.idx)/session.items.length*100);
+    area.innerHTML =
+      '<div class="progressbar"><div style="width:'+pct+'%"></div></div>'+
+      '<div class="card flash" id="flashCard">'+
+        '<div class="toprow" style="justify-content:center;"><span class="catbadge" style="background:'+cat.color+'">'+cat.name+'</span></div>'+
+        '<div class="face" id="flashFace"><div class="qtext">'+item.q+'</div></div>'+
+        '<div class="hint">'+(session.idx+1)+' / '+session.items.length+' · нажми карточку, чтобы увидеть ответ</div>'+
+      '</div>'+
+      '<div class="navrow">'+
+        '<button class="ghost" id="fPrev">Назад</button>'+
+        '<div><button class="ghost" id="fWrong" style="margin-right:8px;">Не знаю</button><button class="primary" id="fKnow">Знаю</button></div>'+
+        '<button class="ghost" id="fNext">Вперёд</button>'+
+      '</div>';
+    var flipped=false;
+    document.getElementById('flashCard').onclick=function(){
+      flipped=!flipped;
+      document.getElementById('flashFace').innerHTML = flipped
+        ? '<div style="font-weight:700;color:var(--good);margin-bottom:8px;">'+item.o[item.a]+'</div><div style="color:var(--fg-dim);font-size:.88rem;line-height:1.5;">'+item.e+'</div>'
+        : '<div class="qtext">'+item.q+'</div>';
+    };
+    document.getElementById('fPrev').onclick=function(){ if(session.idx>0){session.idx--; renderFlashCurrent();} };
+    document.getElementById('fNext').onclick=function(){ if(session.idx<session.items.length-1){session.idx++; renderFlashCurrent();} else { renderSetup(); } };
+    document.getElementById('fKnow').onclick=function(){ progress.wrong[item._id]=false; progress.seen[item._id]=true; saveProgress(); document.getElementById('fNext').click(); };
+    document.getElementById('fWrong').onclick=function(){ progress.wrong[item._id]=true; progress.seen[item._id]=true; saveProgress(); document.getElementById('fNext').click(); };
+  }
+
+  // ---- STATS ----
+  function renderStats(){
+    var area=document.getElementById('playArea');
+    area.style.display='block';
+    var seenIds = Object.keys(progress.seen);
+    var wrongIds = Object.keys(progress.wrong).filter(function(k){return progress.wrong[k];});
+    var rows = CATS.map(function(c){
+      var qs = ALL.filter(function(q){return q.cat===c.id;});
+      var seen = qs.filter(function(q){return progress.seen[q._id];}).length;
+      var wrong = qs.filter(function(q){return progress.wrong[q._id];}).length;
+      return {c:c, total:qs.length, seen:seen, wrong:wrong};
+    });
+    var html = '<div class="card">';
+    html += '<div class="statrow"><span>Всего вопросов: <b>'+ALL.length+'</b></span><span>Пройдено хоть раз: <b>'+seenIds.length+'</b></span><span>Требуют повтора: <b>'+wrongIds.length+'</b></span></div>';
+    rows.forEach(function(r){
+      var ok = r.seen - r.wrong;
+      var pct = r.total ? Math.round(r.seen/r.total*100) : 0;
+      html += '<div style="margin:10px 0;">'+
+        '<div style="display:flex;justify-content:space-between;font-size:.88rem;margin-bottom:4px;"><span style="font-weight:600;">'+r.c.name+'</span><span style="color:var(--fg-dim);">'+r.seen+'/'+r.total+' · ошибок '+r.wrong+'</span></div>'+
+        '<div class="progressbar"><div style="width:'+pct+'%;background:'+r.c.color+'"></div></div></div>';
+    });
+    html += '<button class="ghost" id="resetBtn" style="margin-top:8px;">Сбросить прогресс</button>';
+    html += '</div>';
+    area.innerHTML = html;
+    document.getElementById('resetBtn').onclick=function(){
+      progress = {wrong:{}, seen:{}, mode:'quiz', selectedCats:selectedCats};
+      saveProgress(); renderStats();
+    };
+  }
+
+  renderSetup();
+})();
+</script>
